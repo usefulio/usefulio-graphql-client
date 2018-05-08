@@ -1,10 +1,13 @@
+import { Mutation, compose } from "react-apollo";
 import React, { Component } from "react";
 
 import Button from "material-ui/Button";
 import Paper from "material-ui/Paper";
 import Snackbar from "material-ui/Snackbar";
 import TextField from "material-ui/TextField";
-import sha256 from "../utils/sha256";
+import signIn from "../utils/signIn";
+import updateSignedInMutation from "../graphql/updateSignedIn";
+import { withRouter } from "react-router-dom";
 import { withStyles } from "material-ui/styles";
 
 const styles = theme => ({
@@ -42,80 +45,75 @@ class SignIn extends Component {
     });
   };
 
-  onSubmit = async event => {
-    event.preventDefault();
-    const data = {
-      email: this.state.email,
-      password: sha256(this.state.password)
-    };
-    try {
-      const response = await fetch("http://localhost:3000/loginWithPassword", {
-        method: "POST",
-        body: JSON.stringify(data)
-      });
-      if (response.status === 401) {
-        this.setState({
-          hasError: true,
-          error: "Invalid e-mail or password"
-        });
-      } else if (response.status === 200) {
-        const data = await response.json();
-        if (data.token) {
-          localStorage.setItem("token", data.token);
-        }
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
   onSnackbarClose = () => {
     this.setState({
-      hasError: false
+      hasError: false,
+      error: ""
     });
   };
 
   render() {
-    const { classes } = this.props;
+    const { classes, history } = this.props;
     return (
-      <Paper className={classes.root}>
-        <form className={classes.form} onSubmit={this.onSubmit}>
-          <TextField
-            label="E-mail"
-            className={classes.textField}
-            value={this.state.email}
-            onChange={this.onChange("email")}
-          />
-          <TextField
-            type="password"
-            label="Password"
-            className={classes.textField}
-            value={this.state.password}
-            onChange={this.onChange("password")}
-            autoComplete="current-password"
-          />
-          <Button
-            type="submit"
-            variant="raised"
-            color="primary"
-            className={classes.button}
-          >
-            Sign In
-          </Button>
-        </form>
-        <Snackbar
-          anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "left"
-          }}
-          open={this.state.hasError}
-          onClose={this.onSnackbarClose}
-          autoHideDuration={2000}
-          message={this.state.error}
-        />
-      </Paper>
+      <Mutation mutation={updateSignedInMutation}>
+        {updateSignedIn => (
+          <Paper className={classes.root}>
+            <form
+              className={classes.form}
+              onSubmit={async event => {
+                event.preventDefault();
+                const { email, password } = this.state;
+                try {
+                  if (await signIn({ email, password })) {
+                    // history.push("/");
+                    await updateSignedIn({ variables: { signedIn: true } });
+                  }
+                } catch (error) {
+                  this.setState({
+                    hasError: true,
+                    error: error.message
+                  });
+                }
+              }}
+            >
+              <TextField
+                label="E-mail"
+                className={classes.textField}
+                value={this.state.email}
+                onChange={this.onChange("email")}
+              />
+              <TextField
+                type="password"
+                label="Password"
+                className={classes.textField}
+                value={this.state.password}
+                onChange={this.onChange("password")}
+                autoComplete="current-password"
+              />
+              <Button
+                type="submit"
+                variant="raised"
+                color="primary"
+                className={classes.button}
+              >
+                Sign In
+              </Button>
+            </form>
+            <Snackbar
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "left"
+              }}
+              open={this.state.hasError}
+              onClose={this.onSnackbarClose}
+              autoHideDuration={2000}
+              message={this.state.error}
+            />
+          </Paper>
+        )}
+      </Mutation>
     );
   }
 }
 
-export default withStyles(styles)(SignIn);
+export default compose(withStyles(styles), withRouter)(SignIn);

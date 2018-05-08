@@ -1,16 +1,28 @@
 import "./App.css";
 
-import { Query, compose, graphql } from "react-apollo";
 import React, { Component } from "react";
 
+import { Query } from "react-apollo";
 import SignIn from "./SignIn";
 import Users from "./Users";
-import authorizationQuery from "../graphql/authorization";
+import signedInQuery from "../graphql/signedIn";
 
 class App extends Component {
   render() {
-    return localStorage.getItem("token") ? <Users /> : <SignIn />;
+    return (
+      <Query query={signedInQuery}>
+        {({ loading, error, data }) => {
+          if (loading) {
+            return "Loading...";
+          }
+          if (error) {
+            return `Error! ${error.message}`;
+          }
+          return data.signedIn ? <Users /> : <SignIn />;
+        }}
+      </Query>
+    );
   }
 }
 
-export default compose(graphql(authorizationQuery))(App);
+export default App;
