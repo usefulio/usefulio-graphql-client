@@ -1,13 +1,12 @@
-import { Mutation, compose } from "react-apollo";
 import React, { Component } from "react";
 
 import Button from "material-ui/Button";
+import { Mutation } from "react-apollo";
 import Paper from "material-ui/Paper";
 import Snackbar from "material-ui/Snackbar";
 import TextField from "material-ui/TextField";
 import signIn from "../utils/signIn";
 import updateSignedInMutation from "../graphql/updateSignedIn";
-import { withRouter } from "react-router-dom";
 import { withStyles } from "material-ui/styles";
 
 const styles = theme => ({
@@ -53,7 +52,7 @@ class SignIn extends Component {
   };
 
   render() {
-    const { classes, history } = this.props;
+    const { classes } = this.props;
     return (
       <Mutation mutation={updateSignedInMutation}>
         {updateSignedIn => (
@@ -65,8 +64,7 @@ class SignIn extends Component {
                 const { email, password } = this.state;
                 try {
                   if (await signIn({ email, password })) {
-                    // history.push("/");
-                    await updateSignedIn({ variables: { signedIn: true } });
+                    // await updateSignedIn({ variables: { signedIn: true } });
                   }
                 } catch (error) {
                   this.setState({
@@ -116,4 +114,4 @@ class SignIn extends Component {
   }
 }
 
-export default compose(withStyles(styles), withRouter)(SignIn);
+export default withStyles(styles)(SignIn);
