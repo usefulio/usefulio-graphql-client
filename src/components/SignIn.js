@@ -1,31 +1,38 @@
 import React, { Component } from "react";
-
-import Button from "material-ui/Button";
 import { Mutation } from "react-apollo";
-import Paper from "material-ui/Paper";
-import Snackbar from "material-ui/Snackbar";
-import TextField from "material-ui/TextField";
+
+// Material UI imports.
+import Button from "@material-ui/core/Button";
+import Snackbar from "@material-ui/core/Snackbar";
+import TextField from "@material-ui/core/TextField";
+import { withStyles } from "@material-ui/core/styles";
+
+// GraphQL queries.
+import updateSessionMutation from "../graphql/updateSession";
+
+// Utilities.
 import signIn from "../utils/signIn";
-import updateSignedInMutation from "../graphql/updateSignedIn";
-import { withStyles } from "material-ui/styles";
 
 const styles = theme => ({
-  button: {
-    margin: theme.spacing.unit,
-    width: 200
+  root: {
+    display: "flex",
+    justifyContent: "center"
   },
   form: {
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
+    paddingRight: theme.spacing.unit * 2,
+    paddingBottom: theme.spacing.unit * 2,
+    paddingLeft: theme.spacing.unit * 2
   },
-  root: theme.mixins.gutters({
-    paddingTop: 16,
-    paddingBottom: 16,
-    margin: theme.spacing.unit * 3
-  }),
   textField: {
     marginLeft: theme.spacing.unit,
     marginRight: theme.spacing.unit,
+    width: 200
+  },
+  button: {
+    margin: theme.spacing.unit,
+    marginTop: theme.spacing.unit * 3,
     width: 200
   }
 });
@@ -54,9 +61,9 @@ class SignIn extends Component {
   render() {
     const { classes } = this.props;
     return (
-      <Mutation mutation={updateSignedInMutation}>
-        {updateSignedIn => (
-          <Paper className={classes.root}>
+      <Mutation mutation={updateSessionMutation}>
+        {updateSession => (
+          <div className={classes.root}>
             <form
               className={classes.form}
               onSubmit={async event => {
@@ -64,7 +71,8 @@ class SignIn extends Component {
                 const { email, password } = this.state;
                 try {
                   if (await signIn({ email, password })) {
-                    // await updateSignedIn({ variables: { signedIn: true } });
+                    window.location.replace("/");
+                    // await updateSession({ variables: { signedIn: true } });
                   }
                 } catch (error) {
                   this.setState({
@@ -107,7 +115,7 @@ class SignIn extends Component {
               autoHideDuration={2000}
               message={this.state.error}
             />
-          </Paper>
+          </div>
         )}
       </Mutation>
     );

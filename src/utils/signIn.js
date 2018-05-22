@@ -14,7 +14,6 @@ const signIn = async ({ email, password }) => {
     const { token } = await response.json();
     if (token) {
       localStorage.setItem("token", token);
-      window.location.reload();
       return true;
     }
   }

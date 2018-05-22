@@ -1,40 +1,33 @@
-import "./index.css";
-
-import { Route, BrowserRouter as Router } from "react-router-dom";
-
-import ApolloClient from "apollo-boost";
-import { ApolloProvider } from "react-apollo";
-import App from "./components/App";
 import React from "react";
 import ReactDOM from "react-dom";
-import cache from "./cache";
-import defaultState from "./defaultState";
-import registerServiceWorker from "./registerServiceWorker";
-import resolvers from "./resolvers";
+import { Route, BrowserRouter as Router } from "react-router-dom";
+import { ApolloProvider } from "react-apollo";
 
-const client = new ApolloClient({
-  uri: "http://localhost:3000/graphql",
-  request: async operation => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      operation.setContext({ headers: { Authorization: `Bearer ${token}` } });
-    }
-  },
-  clientState: {
-    cache,
-    defaults: defaultState,
-    resolvers
-  }
-});
+import client from "./client";
+// import registerServiceWorker from "./registerServiceWorker";
+
+// Custom components.
+import App from "./components/App";
+import Content from "./components/Content";
+import Header from "./components/Header";
+import PrivateRoute from "./components/PrivateRoute";
+import SignIn from "./components/SignIn";
+import Users from "./components/Users";
+
+import "./index.css";
 
 ReactDOM.render(
   <ApolloProvider client={client}>
     <Router>
-      <div>
-        <Route exact path="/" component={App} />
-      </div>
+      <App>
+        <Header />
+        <Content>
+          <PrivateRoute exact path="/" component={Users} />
+          <Route path="/login" component={SignIn} />
+        </Content>
+      </App>
     </Router>
   </ApolloProvider>,
   document.getElementById("root")
 );
-registerServiceWorker();
+// registerServiceWorker();

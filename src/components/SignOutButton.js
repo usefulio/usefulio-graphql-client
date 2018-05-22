@@ -1,10 +1,15 @@
 import React, { Component } from "react";
-
-import Button from "material-ui/Button";
 import { Mutation } from "react-apollo";
+
+// Material UI imports.
+import Button from "@material-ui/core/Button";
+import { withStyles } from "@material-ui/core/styles";
+
+// GraphQL queries.
+import updateSessionMutation from "../graphql/updateSession";
+
+// Utilities.
 import signOut from "../utils/signOut";
-import updateSignedInMutation from "../graphql/updateSignedIn";
-import { withStyles } from "material-ui/styles";
 
 const styles = theme => ({
   button: {
@@ -13,21 +18,21 @@ const styles = theme => ({
   }
 });
 
-class SignOut extends Component {
+class SignOutButton extends Component {
   render() {
     const { classes } = this.props;
 
     return (
-      <Mutation mutation={updateSignedInMutation}>
-        {updateSignedIn => (
+      <Mutation mutation={updateSessionMutation}>
+        {updateSession => (
           <Button
             type="submit"
-            variant="raised"
-            color="primary"
+            color="inherit"
             className={classes.button}
             onClick={async () => {
               if (signOut()) {
-                // await updateSignedIn({ variables: { signedIn: false } });
+                window.location.replace("/");
+                // await updateSession({ variables: { signedIn: false } });
               }
             }}
           >
@@ -39,4 +44,4 @@ class SignOut extends Component {
   }
 }
 
-export default withStyles(styles)(SignOut);
+export default withStyles(styles)(SignOutButton);
